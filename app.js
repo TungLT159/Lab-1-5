@@ -17,9 +17,7 @@ const store = new MongoDBStore({
     uri: MONGODB_URI,
     collection: 'session'
 })
-const csrfProtection = csrf({
-
-})
+const csrfProtection = csrf()
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
@@ -47,13 +45,10 @@ app.use((req, res, next) => {
 })
 
 app.use((req, res, next) => {
-    User.findById("62fcb4b968eacff4ab40627b")
-        .then(user => {
-            req.user = user
-            next();
-        })
-        .catch(err => console.log(err));
-});
+    res.locals.isAuthenticated = req.session.isLoggedIn
+    res.locals.csrfToken = req.csrfToken()
+    next()
+})
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
