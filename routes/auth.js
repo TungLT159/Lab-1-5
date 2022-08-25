@@ -22,7 +22,13 @@ router.post(
             }
             return true
         }),
-        body('password', 'Password least 5 characters').isLength({ min: 5 }).isAlphanumeric()
+        body('password', 'Password least 5 characters').isLength({ min: 5 }).isAlphanumeric(),
+        body('confirmPassword').custom((value, { req }) => {
+            if (value !== req.body.password) {
+                throw new Error('Password have to match')
+            }
+            return true
+        })
     ],
     authController.postSignup);
 
