@@ -13,24 +13,18 @@ router.get('/login', authController.getLogin);
 router.get('/signup', authController.getSignup);
 
 router.post(
-    '/login', [check('email').custom((value, { req }) => {
-            return User.findOne({ email: value })
-                .then(user => {
-                    if (!user) {
-                        return Promise.reject('Email is not correct')
-                    }
-                })
-        }),
-        check('password').custom((value, { req }) => {
-            return User.findOne({ password: value })
-                .then(user => {
-                    if (!user) {
-                        return Promise.reject('Password is not correct')
-                    }
-                })
-        })
+    '/login', [
+        body('email')
+        .isEmail()
+        .withMessage('Please enter a valid email address.')
+        .normalizeEmail(),
+        body('password', 'Password has to be valid.')
+        .isLength({ min: 5 })
+        .isAlphanumeric()
+        .trim()
     ],
-    authController.postLogin);
+    authController.postLogin
+);
 
 router.post(
     '/signup', [check('email')
@@ -43,8 +37,8 @@ router.post(
                         return Promise.reject('E-Mail exists already, please pick a different one.')
                     }
                 })
-        }),
-        body('password', 'Password least 5 characters').isLength({ min: 5 }).isAlphanumeric(),
+        }).normalizeEmail(),
+        body('password', 'Password least 5 characters').isLength({ min: 5 }).isAlphanumeric().trim(),
         body('confirmPassword').custom((value, { req }) => {
             if (value !== req.body.password) {
                 throw new Error('Password have to match')
